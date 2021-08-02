@@ -2,6 +2,7 @@ import pygame as pg
 import math
 import random as rnd
 import numpy as np
+import time
 
 pg.init()
 if pg.display.Info().current_h < pg.display.Info().current_w:
@@ -206,6 +207,7 @@ def move_tile(x, y):
                                                                                tiles[pos][1] + tile_size):
             selected_tile = list(alphabets.keys())[tiles_filling[pos - 1]]
             click_count = 1
+            animate(tiles[pos][0], tiles[pos][1], int(x-(tile_size+4)/2), int(y-(tile_size+4)/2), selected_tile, -1)
             while True:
                 for mouse_event in pg.event.get():
                     if mouse_event.type == pg.MOUSEBUTTONUP:
@@ -426,11 +428,447 @@ def clear_grid():
             alphabets_on_grid[pos] = None
 
 
-def animate(x1, y1, x2, y2, layer):
+def animate(x1, y1, x2, y2, layer, *stat):
+
+    # stat: -1 -> tile to block
+    # stat: 0  -> block to block
+    # stat:  1 -> block to tile
+
     dx = abs(x2-x1)
     dy = abs(y2-y1)
-    while i:
+    
+    if stat == -1:
+        pass
+    if stat == 0 or stat == 1:
+        for s in range(block_size-4, tile_size-4):
+            time.sleep(0.005)
+            screen.blit(pg.transform.scale(layer, (s, s)), (x1, y1))
+            pg.display.update()
 
+            screen.fill([17, 20, 26])
+            draw_background()
+            draw_grid()
+            draw_tiles()
+            put_tiles()
+            bars()
+
+    if dy > dx:
+        if x1 == x2 and y2 > y1:
+            for y in range(y1, y2):
+                    time.sleep(0.005)
+                    screen.blit(layer, (x1, y))
+                    pg.display.update()
+
+                    screen.fill([17, 20, 26])
+                    draw_background()
+                    draw_grid()
+                    draw_tiles()
+                    put_tiles()
+                    bars()
+        if x1 == x2 and y1 > y2:
+            for y in range(y2, y1, -1):
+                time.sleep(0.005)
+                screen.blit(layer, (x1, y))
+                pg.display.update()
+
+                screen.fill([17, 20, 26])
+                draw_background()
+                draw_grid()
+                draw_tiles()
+                put_tiles()
+                bars()
+                y_step = math.floor(dy/dx)
+        if dx != 0:
+            y_step = math.floor(dy/dx)
+        if x1 > x2 and y1 > y2:
+            count = 0
+            for x in range(x2, x1, -1):
+                count += 1
+                if y1 - count*y_step >= y2:
+                    for y in range(y1-count*y_step, y1-(count-1)*y_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for y in range(y2, y1-(count-1)*y_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for X in range(x2, x, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (X, y2))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x2 > x1 and y1 > y2:
+            count = 0
+            for x in range(x1, x2):
+                count += 1
+                if y1 - count*y_step >= y2:
+                    for y in range(y1-count*y_step, y1-(count-1)*y_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for y in range(y2, y1-(count-1)*y_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for X in range(x,):
+                        time.sleep(0.005)
+                        screen.blit(layer, (X, y2))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x1 > x2 and y2 > y1:
+            count = 0
+            for x in range(x2, x1, -1):
+                count += 1
+                if y1 + count*y_step <= y2:
+                    for y in range(y1+(count-1)*y_step, y1+count*y_step):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for y in range(y1-(count-1)*y_step, y2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for X in range(x2, x, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (X, y2))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x2 > x1 and y2 > y1:
+            count = 0
+            for x in range(x1, x2):
+                count += 1
+                if y1 + count*y_step <= y2:
+                    for y in range(y1+(count-1)*y_step, y1+count*y_step):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for y in range(y1-(count-1)*y_step, y2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for X in range(x, x2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (X, y2))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+    if dx > dy:
+        if y1 == y2 and x2 > x1:
+            for x in range(x1, x2):
+                time.sleep(0.005)
+                screen.blit(layer, (x, y1))
+                pg.display.update()
+
+                screen.fill([17, 20, 26])
+                draw_background()
+                draw_grid()
+                draw_tiles()
+                put_tiles()
+                bars()
+        if y1 == y2 and x1 > x2:
+            for x in range(x2, x1, -1):
+                time.sleep(0.005)
+                screen.blit(layer, (x, y1))
+                pg.display.update()
+
+                screen.fill([17, 20, 26])
+                draw_background()
+                draw_grid()
+                draw_tiles()
+                put_tiles()
+                bars()
+        if dy != 0: 
+            x_step = math.floor(dx/dy)
+        if x1 > x2 and y1 > y2:
+            count = 0
+            for y in range(y2, y1, -1):
+                count += 1
+                if x1 - count*x_step >= x2:
+                    for x in range(x1-count*x_step, x1-(count-1)*x_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for x in range(x2, x1-(count-1)*x_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for Y in range(y2, y, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x2, Y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x2 > x1 and y1 > y2:
+            count = 0
+            for y in range(y2, y1, -1):
+                count += 1
+                if x1 + count*x_step <= x2:
+                    for x in range(x1+(count-1)*x_step, x1+count*x_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for x in range(x1+(count-1)*x_step, x2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for Y in range(y2, y, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x2, Y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x1 > x2 and y2 > y1:
+            count = 0
+            for y in range(y1, y2):
+                count += 1
+                if x1 - count*x_step <= x2:
+                    for x in range(x1-count*x_step, x1-(count-1)*x_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for x in range(x2, x1-(count-1)*x_step, -1):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for Y in range(y, y2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x2, Y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+        if x2 > x1 and y2 > y1:
+            count = 0
+            for y in range(y1, y2):
+                count += 1
+                if x1 + count*x_step <= x2:
+                    for x in range(x1+(count-1)*x_step, x1+count*x_step):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                else:
+                    for x in range(x1-(count-1)*x_step, x2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x, y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    for Y in range(y, y2):
+                        time.sleep(0.005)
+                        screen.blit(layer, (x2, Y))
+                        pg.display.update()
+
+                        screen.fill([17, 20, 26])
+                        draw_background()
+                        draw_grid()
+                        draw_tiles()
+                        put_tiles()
+                        bars()
+                    break
+    if dx == dy:
+        x = x2
+        y = y2
+        for i in range(dx):
+
+            if x2 > x1 and y2 > y1:
+                x += 1
+                y += 1
+            if x1 > x2 and y2 > y1:
+                x -= 1
+                y += 1
+            if x2 > x1 and y1 > y2:
+                x += 1
+                y -= 1
+            if x1 > x2 and y1 > y2:
+                x -= 1
+                y -= 1
+
+            time.sleep(0.005)
+            screen.blit(layer, (x, y))
+            pg.display.update()
+
+            screen.fill([17, 20, 26])
+            draw_background()
+            draw_grid()
+            draw_tiles()
+            put_tiles()
+            bars()
+    if stat == -1 or stat == 0:
+        for s in range(block_size-4, tile_size-4, -1):
+            time.sleep(0.005)
+            screen.blit(pg.transform.scale(layer, (s, s)), (x1, y1))
+            pg.display.update()
+
+            screen.fill([17, 20, 26])
+            draw_background()
+            draw_grid()
+            draw_tiles()
+            put_tiles()
+            bars()
+    if stat == 1:
+        pass
 
 
 start_tile()
