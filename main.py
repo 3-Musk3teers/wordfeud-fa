@@ -237,11 +237,10 @@ def move_tile(x, y):
                                 tiles_filling[tile-1]
                             except IndexError:
                                 del tiles_filling[pos - 1]
-                                tiles_filling.append(list(alphabets.keys()).index(selected_tile))
                                 animate(pg.mouse.get_pos()[0]+2-int(tile_size/2),
-                                        pg.mouse.get_pos()[0]+2-int(tile_size/2), tiles_to_fill[tile][0],
-                                        tiles_to_fill[tile][0], selected_tile)
-
+                                        pg.mouse.get_pos()[1]+2-int(tile_size/2), tiles_to_fill[len(tiles_filling)+1][0],
+                                        tiles_to_fill[len(tiles_filling)+1][1], selected_tile)
+                                tiles_filling.append(list(alphabets.keys()).index(selected_tile))
                     break
                 pg.draw.rect(screen, [79, 79, 79], pg.Rect(tiles_to_fill[pos][0], tiles_to_fill[pos][1], tile_size-4,
                              tile_size-4), 0)
@@ -268,6 +267,7 @@ def move_tile(x, y):
                         selected_tile)
 
                 while True:
+                    on_pos = False
                     for mouse_event in pg.event.get():
                         if mouse_event.type == pg.MOUSEBUTTONUP:
                             click_count = 2
@@ -276,9 +276,14 @@ def move_tile(x, y):
                             if pg.mouse.get_pos()[0] in range(blocks[block][0], blocks[block][0] + block_size) and \
                                     pg.mouse.get_pos()[1] in range(blocks[block][1], blocks[block][1] + block_size):
                                 if alphabets_on_grid[block] is None:
+                                    animate(pg.mouse.get_pos()[0] + 2 - int(tile_size / 2),
+                                            pg.mouse.get_pos()[1] + 2 - int(tile_size / 2), blocks[block][0] + 2,
+                                            blocks[block][1] + 2, selected_tile)
+                                    rescale(blocks[block][0] + 2, blocks[block][1] + 2, selected_tile, 0)
                                     alphabets_on_grid[block] = alphabets[selected_tile]
                                     del new_on_grid[pos]
                                     new_on_grid[block] = alphabets_on_grid[block]
+                                    on_pos = True
                                     break
                                 else:
                                     alphabets_on_grid[pos] = alphabets[selected_tile]
@@ -291,6 +296,9 @@ def move_tile(x, y):
                                 except IndexError:
                                     tiles_filling.append(list(alphabets.keys()).index(selected_tile))
                                     del new_on_grid[pos]
+                                    on_pos = True
+                        if not on_pos:
+                            alphabets_on_grid[pos] = alphabets[selected_tile]
                         break
                     screen.blit(selected_tile, (pg.mouse.get_pos()[0]-tile_size/2, pg.mouse.get_pos()[1]-tile_size/2))
                     pg.display.update()
@@ -485,7 +493,6 @@ def animate(x1, y1, x2, y2, layer):
             y_step = math.floor(dy / dx)
 
         if x1 > x2 and y1 > y2:
-            print(14)
             for x in range(x1, x2-1, -1):
                 count += 1
                 if y1 - count*y_step >= y2:
@@ -526,7 +533,6 @@ def animate(x1, y1, x2, y2, layer):
                     break
 
         if x2 > x1 and y1 > y2:
-            print(13)
 
             for x in range(x1, x2+1):
                 count += 1
@@ -568,7 +574,6 @@ def animate(x1, y1, x2, y2, layer):
                     break
 
         if x1 > x2 and y2 > y1:
-            print(11)
 
             for x in range(x1, x2-1, -1):
                 count += 1
@@ -610,7 +615,6 @@ def animate(x1, y1, x2, y2, layer):
                     break
 
         if x2 > x1 and y2 > y1:
-            print(12)
 
             for x in range(x1, x2+1):
                 count += 1
