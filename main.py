@@ -211,34 +211,36 @@ def move_tile(x, y):
                          tile_size-4), 0)
             pg.display.update()
 
-            animate(tiles_to_fill[pos][0], tiles_to_fill[pos][1], x-int((tile_size-4)/2), y-int((tile_size-4)/2), selected_tile, True, False)
+            animate(tiles_to_fill[pos][0], tiles_to_fill[pos][1], x-int((tile_size-4)/2), y-int((tile_size-4)/2),
+                    selected_tile)
             while True:
                 for mouse_event in pg.event.get():
                     if mouse_event.type == pg.MOUSEBUTTONUP:
                         click_count = 2
                 if click_count == 2:
                     for block in blocks.keys():
-                        mouse_corr = pg.mouse.get_pos()
-                        if mouse_corr[0] in range(blocks[block][0], blocks[block][0] + block_size) and \
-                                mouse_corr[1] in range(blocks[block][1], blocks[block][1] + block_size):
+                        if pg.mouse.get_pos()[0] in range(blocks[block][0], blocks[block][0] + block_size) and\
+                                pg.mouse.get_pos()[1] in range(blocks[block][1], blocks[block][1] + block_size):
                             if alphabets_on_grid[block] is None:
-                                animate(mouse_corr[0]+2-int(tile_size/2), mouse_corr[0]+2-int(tile_size/2), blocks[block][0]+2, blocks[block][1]+2,
-                                        selected_tile, False, True)
+                                animate(pg.mouse.get_pos()[0]+2-int(tile_size/2),
+                                        pg.mouse.get_pos()[1]+2-int(tile_size/2), blocks[block][0]+2,
+                                        blocks[block][1]+2, selected_tile)
+                                rescale(blocks[block][0] + 2, blocks[block][1] + 2, selected_tile, 0)
                                 alphabets_on_grid[block] = list(alphabets.values())[tiles_filling[pos - 1]]
                                 new_on_grid[block] = alphabets_on_grid[block]
                                 del tiles_filling[pos - 1]
                                 break
                     for tile in tiles.keys():
-                        mouse_corr = pg.mouse.get_pos()
-                        if mouse_corr[0] in range(tiles[tile][0], tiles[tile][0] + tile_size) and \
-                                mouse_corr[1] in range(tiles[tile][1], tiles[tile][1] + tile_size):
+                        if pg.mouse.get_pos()[0] in range(tiles[tile][0], tiles[tile][0] + tile_size) and \
+                                pg.mouse.get_pos()[1] in range(tiles[tile][1], tiles[tile][1] + tile_size):
                             try:
                                 tiles_filling[tile-1]
                             except IndexError:
                                 del tiles_filling[pos - 1]
                                 tiles_filling.append(list(alphabets.keys()).index(selected_tile))
-                                animate(mouse_corr[0]+2-int(tile_size/2), mouse_corr[0]+2-int(tile_size/2), tiles_to_fill[tile][0], tiles_to_fill[tile][0],
-                                        selected_tile, False, False)
+                                animate(pg.mouse.get_pos()[0]+2-int(tile_size/2),
+                                        pg.mouse.get_pos()[0]+2-int(tile_size/2), tiles_to_fill[tile][0],
+                                        tiles_to_fill[tile][0], selected_tile)
 
                     break
                 pg.draw.rect(screen, [79, 79, 79], pg.Rect(tiles_to_fill[pos][0], tiles_to_fill[pos][1], tile_size-4,
@@ -261,7 +263,9 @@ def move_tile(x, y):
                 click_count = 1
                 alphabets_on_grid[pos] = None
 
-                animate(blocks[pos][0]+2, blocks[pos][1]+2, x-int((tile_size-4)/2), y-int((tile_size-4)/2), selected_tile, True, True)
+                rescale(blocks[pos][0]+2, blocks[pos][1]+2, selected_tile, 1)
+                animate(blocks[pos][0]+2, blocks[pos][1]+2, x-int((tile_size-4)/2), y-int((tile_size-4)/2),
+                        selected_tile)
 
                 while True:
                     for mouse_event in pg.event.get():
@@ -441,44 +445,32 @@ def clear_grid():
             alphabets_on_grid[pos] = None
 
 
-def animate(x1, y1, x2, y2, layer, drag, stat):
+def animate(x1, y1, x2, y2, layer):
 
     # stat: False  -> scale doesn't change
     # stat:  True -> scale changes
 
     dx = abs(x2-x1)
     dy = abs(y2-y1)
-    
-    if drag and stat:
-        for s in range(block_size-4, tile_size-3):
-            time.sleep(0.005)
-            screen.blit(pg.transform.scale(layer, (s, s)), (x1, y1))
-            pg.display.update()
-
-            screen.fill([17, 20, 26])
-            draw_background()
-            draw_grid()
-            draw_tiles()
-            put_tiles()
-            bars()
+    count = 0
 
     if dy > dx:
         if x1 == x2 and y2 > y1:
-            for y in range(y1, y2+1):
-                    time.sleep(0.005)
-                    screen.blit(layer, (x1, y))
-                    pg.display.update()
+            for y in range(y1, y2 + 1):
+                time.sleep(0.000625)
+                screen.blit(layer, (x1, y))
+                pg.display.update()
 
-                    screen.fill([17, 20, 26])
-                    draw_background()
-                    draw_grid()
-                    draw_tiles()
-                    put_tiles()
-                    bars()
+                screen.fill([17, 20, 26])
+                draw_background()
+                draw_grid()
+                draw_tiles()
+                put_tiles()
+                bars()
 
         if x1 == x2 and y1 > y2:
-            for y in range(y1, y2-1, -1):
-                time.sleep(0.005)
+            for y in range(y1, y2 - 1, -1):
+                time.sleep(0.000625)
                 screen.blit(layer, (x1, y))
                 pg.display.update()
 
@@ -490,16 +482,15 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                 bars()
 
         if dx != 0:
-            y_step = math.floor(dy/dx)
+            y_step = math.floor(dy / dx)
 
         if x1 > x2 and y1 > y2:
             print(14)
-            count = 0
             for x in range(x1, x2-1, -1):
                 count += 1
                 if y1 - count*y_step >= y2:
                     for y in range(y1-(count-1)*y_step, y1-count*y_step-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -511,7 +502,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for y in range(y1-(count-1)*y_step, y2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -522,7 +513,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for X in range(x, x2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (X, y2))
                         pg.display.update()
 
@@ -536,12 +527,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
 
         if x2 > x1 and y1 > y2:
             print(13)
-            count = 0
+
             for x in range(x1, x2+1):
                 count += 1
                 if y1 - count*y_step >= y2:
                     for y in range(y1-(count-1)*y_step, y1-count*y_step-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -553,7 +544,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for y in range(y1-(count-1)*y_step, y2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -564,7 +555,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for X in range(x, x2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (X, y2))
                         pg.display.update()
 
@@ -575,15 +566,15 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     break
-    
+
         if x1 > x2 and y2 > y1:
             print(11)
-            count = 0
+
             for x in range(x1, x2-1, -1):
                 count += 1
                 if y1 + count*y_step <= y2:
                     for y in range(y1+(count-1)*y_step, y1+count*y_step+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -595,7 +586,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for y in range(y1+(count-1)*y_step, y2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -606,7 +597,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for X in range(x, x2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (X, y2))
                         pg.display.update()
 
@@ -620,12 +611,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
 
         if x2 > x1 and y2 > y1:
             print(12)
-            count = 0
+
             for x in range(x1, x2+1):
                 count += 1
                 if y1 + count*y_step <= y2:
                     for y in range(y1+(count-1)*y_step, y1+count*y_step+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -637,7 +628,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for y in range(y1+(count-1)*y_step, y2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -648,7 +639,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for X in range(x, x2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (X, y2))
                         pg.display.update()
 
@@ -663,7 +654,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
     if dx > dy:
         if y1 == y2 and x2 > x1:
             for x in range(x1, x2+1):
-                time.sleep(0.005)
+                time.sleep(0.000625)
                 screen.blit(layer, (x, y1))
                 pg.display.update()
 
@@ -676,7 +667,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
         
         if y1 == y2 and x1 > x2:
             for x in range(x1, x2-1, -1):
-                time.sleep(0.005)
+                time.sleep(0.000625)
                 screen.blit(layer, (x, y1))
                 pg.display.update()
 
@@ -691,12 +682,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
             x_step = math.floor(dx/dy)
         
         if x1 > x2 and y1 > y2:
-            count = 0
+            
             for y in range(y1, y2-1, -1):
                 count += 1
                 if x1 - count*x_step >= x2:
                     for x in range(x1-(count-1)*x_step, x1-count*x_step-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -708,7 +699,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for x in range(x1-(count-1)*x_step, x2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -719,7 +710,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for Y in range(y, y2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x2, Y))
                         pg.display.update()
 
@@ -732,12 +723,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                     break
         
         if x2 > x1 and y1 > y2:
-            count = 0
+            
             for y in range(y1, y2-1, -1):
                 count += 1
                 if x1 + count*x_step <= x2:
                     for x in range(x1+count*x_step, x1+(count-1)*x_step-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -749,7 +740,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for x in range(x1+(count-1)*x_step, x2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -760,7 +751,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for Y in range(y, y2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x2, Y))
                         pg.display.update()
 
@@ -773,12 +764,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                     break
         
         if x1 > x2 and y2 > y1:
-            count = 0
+            
             for y in range(y1, y2+1):
                 count += 1
                 if x1 - count*x_step >= x2:
                     for x in range(x1-(count-1)*x_step, x1-count*x_step-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -790,7 +781,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for x in range(x1-(count-1)*x_step, x2-1, -1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -802,7 +793,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                     
                     for Y in range(y, y2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x2, Y))
                         pg.display.update()
 
@@ -815,12 +806,12 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                     break
         
         if x2 > x1 and y2 > y1:
-            count = 0
+            
             for y in range(y1, y2+1):
                 count += 1
                 if x1 + count*x_step <= x2:
                     for x in range(x1+(count-1)*x_step, x1+count*x_step+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -832,7 +823,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         bars()
                 else:
                     for x in range(x1+(count-1)*x_step, x2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x, y))
                         pg.display.update()
 
@@ -843,7 +834,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                         put_tiles()
                         bars()
                     for Y in range(y, y2+1):
-                        time.sleep(0.005)
+                        time.sleep(0.000625)
                         screen.blit(layer, (x2, Y))
                         pg.display.update()
 
@@ -873,7 +864,7 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
                 x -= 1
                 y -= 1
 
-            time.sleep(0.005)
+            time.sleep(0.000625)
             screen.blit(layer, (x, y))
             pg.display.update()
 
@@ -883,11 +874,31 @@ def animate(x1, y1, x2, y2, layer, drag, stat):
             draw_tiles()
             put_tiles()
             bars()
-    
-    if not drag and stat:
+
+
+def rescale(x, y, layer, scale_code):
+
+    # scale_code : 0 -> for dropping on a block; shrink layer from tile_size to block_size
+    # scale_code : 1 -> for dragging from a block; extend layer from block_size into tile_size
+
+    if str(scale_code) == "0":
         for s in range(tile_size-4, block_size-5, -1):
-            time.sleep(0.005)
-            screen.blit(pg.transform.scale(layer, (s, s)), (x2-2+int(block_size/2)-int(s/2), y2-2+int(block_size/2)-int(s/2)))
+            time.sleep(0.000625)
+            screen.blit(pg.transform.scale(layer, (s, s)), (x-2+int(block_size/2)-int(s/2),
+                                                            y-2+int(block_size/2)-int(s/2)))
+            pg.display.update()
+
+            screen.fill([17, 20, 26])
+            draw_background()
+            draw_grid()
+            draw_tiles()
+            put_tiles()
+            bars()
+
+    if str(scale_code) == "1":
+        for s in range(block_size-4, tile_size-3):
+            time.sleep(0.000625)
+            screen.blit(pg.transform.scale(layer, (s, s)), (x, y))
             pg.display.update()
 
             screen.fill([17, 20, 26])
