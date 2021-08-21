@@ -1,17 +1,22 @@
+from numpy.core.arrayprint import IntegerFormat
 import pygame as pg
 import math
 import random as rnd
 import numpy as np
 import time
+import arabic_reshaper
 
 pg.init()
 if pg.display.Info().current_h < pg.display.Info().current_w:
-    width = pg.display.Info().current_h - 100
+    width = pg.display.Info().current_h - 65
 else:
-    width = pg.display.Info().current_w - 100
+    width = pg.display.Info().current_w - 65
 block_size = math.floor(width / 20)
 tile_size = math.floor(width / 15)
 font = pg.font.SysFont("Simplified Arabic", block_size)
+font1 = pg.font.SysFont("Simplified Arabic", int(2.5*block_size/3))
+font2 = pg.font.SysFont("Simplified Arabic", int(2.5*block_size/3))
+font3 = pg.font.SysFont("Simplified Arabic", int(block_size/2))
 WHITE = (255, 255, 255)
 
 with open("words\\fa2.txt", "r", encoding='utf-8') as f:
@@ -504,11 +509,11 @@ def find_word():
     new_words = {}
     try:
         if not on_a_line()[0] and on_a_line()[1] == 0:
-            return False, "no new alphabet"
+            return False, "No new alphabet found"
         elif not on_a_line()[0] and on_a_line()[1] == 1:
-            return False, "at least 2 alphabets in a row required"
+            return False, "At least two alphabets in a row required"
         elif not on_a_line()[0] and on_a_line()[1] == 2:
-            return False, "alphabets are not in a row"
+            return False, "Alphabets are not in a row"
         else:
             pass
         # vertical search
@@ -583,11 +588,9 @@ def find_word():
 def next_round():
     global new_on_grid, tiles_filling, score
     if mouse_pos[0] in range(int(2 * width / 15) + 15 * block_size, int(29 * width / 120) + 15 * block_size) and \
-            mouse_pos[1] in \
-            range(int(width / 8), int(23 * width / 120)):
+            mouse_pos[1] in range(int(width / 8), int(23 * width / 120)):
         stat = find_word()
         if stat[0]:
-            print(stat[1])
             new_on_grid.clear()
             for word in stat[1]:
                 if word == 0:
@@ -596,11 +599,22 @@ def next_round():
                     score += scores[i]
             for i in range(8 - len(tiles_filling)):
                 tiles_filling.append(rnd.randint(0, 32))
+            print(retype_word(stat[1]))
         else:
             if stat[1] == "false words":
-                print(stat[2], " is not in dictionary")
+                f_words_list = retype_word(stat[2])
+                error_text = ""
+                for f_word in f_words_list:
+                    error_text += f_word + ", "
+                if len(stat[2]) > 1:
+                    error_text = error_text[:-2] + " are not in dictionary"
+                else:
+                    error_text = error_text[:-2] + " is not in dictionary"
+                print(error_text)
+                show_error(error_text, len(error_text))
             else:
                 print(stat[1])
+                show_error(stat[1], len(stat[1]))
 
 
 def bars():
@@ -1077,18 +1091,64 @@ def rescale(x, y, layer, scale_code):
             bars()
 
 
+def show_error(error, error_length):
+
+    error_rec = pg.Rect(blocks[62][0], blocks[62][1], 13*block_size, 7*block_size)
+    pg.draw.rect(screen, [54, 54, 54], error_rec, 0, border_radius=3)
+    pg.draw.rect(screen, [0, 0, 0], error_rec, 1, border_radius=3)
+    ok_rec = pg.Rect(blocks[142][0]+int(block_size/2), blocks[142][1]+int(block_size/2), 2*block_size, block_size)
+    pg.draw.rect(screen, [45, 45, 45], ok_rec, 0, border_radius=3)
+    pg.draw.rect(screen, [0, 0, 0], ok_rec, 1, border_radius=3)
+    screen.blit(font2.render("OK", True, WHITE), (blocks[143][0]-int(block_size/7), blocks[143][1]+int(block_size/3)))
+    screen.blit(font3.render("WordFeud farsi", True, [150, 150, 150]), (blocks[67][0], blocks[67][1]))
+    if error_length > 31 and error[-21:] == "are not in dictionary":
+        screen.blit(font1.render(error[:-21], True, [250, 50, 50]), (blocks[78][0], blocks[78][1]))
+        screen.blit(font1.render(error[-21:], True, [250, 50, 50]), (blocks[93][0], blocks[93][1]))
+    elif error_length > 31 and error[-20:] == "is not in dictionary":
+        screen.blit(font1.render(error[:-20], True, [250, 50, 50]), (blocks[78][0], blocks[78][1]))
+        screen.blit(font1.render(error[-20:], True, [250, 50, 50]), (blocks[93][0], blocks[93][1]))
+
+    else:
+        screen.blit(font1.render(error, True, [250, 50, 50]), (blocks[78][0], blocks[78][1]))
+    pg.display.update()
+    ok_clicked = False
+    while 1:
+        for event1 in pg.event.get():
+            if event1.type == pg.MOUSEBUTTONUP:
+                if event1.button == 1:
+                    if pg.mouse.get_pos()[0] in range(blocks[142][0]+int(block_size/2)+4,
+                                                      blocks[144][0]+int(block_size/2)-5) and \
+                            pg.mouse.get_pos()[1] in range(blocks[142][1]+int(block_size/2)+4,
+                                                           blocks[157][1]+int(block_size/2)-5):
+                        pg.draw.rect(screen, [50, 50, 50], ok_rec, 0, border_radius=3)
+                        pg.draw.rect(screen, [20, 20, 20], ok_rec, 1, border_radius=3)
+                        screen.blit(font2.render("OK", True, [190, 190, 190]),
+                                    (blocks[143][0] - int(block_size / 7), blocks[143][1] + int(block_size / 3)))
+                        pg.display.update()
+                        time.sleep(0.07)
+                        ok_clicked = True
+        if ok_clicked:
+            break
+
+
+def retype_word(words):
+    for i in range(len(words)):
+        reshaped_word = ""
+        words[i] = arabic_reshaper.reshape(words[i])
+        for j in range(len(words[i])-1, -1, -1):
+            reshaped_word += words[i][j]
+        words[i] = reshaped_word
+    return words
+
 start_tile()
 done = False
-clock = pg.time.Clock()
 while not done:
-    clock.tick(60)
     mouse_pos = pg.mouse.get_pos()
     draw_background()
     draw_grid()
     draw_tiles()
     put_tiles()
     bars()
-
     for event in pg.event.get():
         if event.type == pg.QUIT:
             done = True
